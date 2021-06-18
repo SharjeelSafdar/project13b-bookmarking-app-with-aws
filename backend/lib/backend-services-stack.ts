@@ -6,7 +6,10 @@ export class ServicesStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const tableName = "BookmarksTable";
+
     const bookmarksTable = new ddb.Table(this, "P13bBookmarksTable", {
+      tableName,
       partitionKey: {
         name: "id",
         type: ddb.AttributeType.STRING,
@@ -85,6 +88,30 @@ export class ServicesStack extends cdk.Stack {
         "id"
       ),
       responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
+    });
+
+    ddbDataSource.createResolver({
+      typeName: "Mutation",
+      fieldName: "batchDeleteBookmarks",
+      requestMappingTemplate: appsync.MappingTemplate.fromString(`
+        #set($ids = [])
+        #foreach($id in $ctx.args.ids)
+          #set($map = {})
+          $util.qr($map.put("id", $util.dynamodb.toString($id)))
+          $util.qr($ids.add($map))
+        #end
+        
+        {
+          "version" : "2018-05-29",
+          "operation" : "BatchDeleteItem",
+          "tables" : {
+            "${tableName}": $util.toJson($ids)
+          }
+        }
+      `),
+      responseMappingTemplate: appsync.MappingTemplate.fromString(`
+        $util.toJson($ctx.result.data.${tableName})
+      `),
     });
 
     new cdk.CfnOutput(this, "P13bGraphQLApiId", {

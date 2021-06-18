@@ -3,11 +3,18 @@ type Bookmark {
   title: String!
   url: String!
 }
-type Query {
-  bookmarks: [Bookmark]!
+
+type DeletedBookmark {
+  id: ID!
 }
+
+type Query {
+  bookmarks: [Bookmark!]!
+}
+
 type Mutation {
   createBookmark(title: String!, url: String!): Bookmark!
   editBookmark(id: ID!, title: String!, url: String!): Bookmark!
   deleteBookmark(id: ID!): Bookmark!
+  batchDeleteBookmarks(ids: [ID!]!): [DeletedBookmark]!
 }
