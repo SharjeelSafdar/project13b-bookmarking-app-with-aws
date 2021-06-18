@@ -29,3 +29,10 @@ export const deleteBookmark = /* GraphQL */ `
     }
   }
 `;
+export const batchDeleteBookmarks = /* GraphQL */ `
+  mutation BatchDeleteBookmarks($ids: [ID!]!) {
+    batchDeleteBookmarks(ids: $ids) {
+      id
+    }
+  }
+`;

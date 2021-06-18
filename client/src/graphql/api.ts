@@ -9,6 +9,11 @@ export type Bookmark = {
   url: string,
 };
 
+export type DeletedBookmark = {
+  __typename: "DeletedBookmark",
+  id: string,
+};
+
 export type CreateBookmarkMutationVariables = {
   title: string,
   url: string,
@@ -51,11 +56,22 @@ export type DeleteBookmarkMutation = {
   },
 };
 
+export type BatchDeleteBookmarksMutationVariables = {
+  ids: Array< string >,
+};
+
+export type BatchDeleteBookmarksMutation = {
+  batchDeleteBookmarks:  Array< {
+    __typename: "DeletedBookmark",
+    id: string,
+  } | null >,
+};
+
 export type BookmarksQuery = {
   bookmarks:  Array< {
     __typename: "Bookmark",
     id: string,
     title: string,
     url: string,
-  } | null >,
+  } >,
 };
