@@ -52,7 +52,7 @@ jobs:
         with: { node-version: "14.15.0" }
 
       - name: Install Dependencies
-        working-directory: backend
+        working-directory: client
         run: |
           npm i -g yarn
           yarn
