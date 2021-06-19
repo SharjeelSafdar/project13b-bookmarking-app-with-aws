@@ -33,9 +33,6 @@ jobs:
   DeployApp:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -49,15 +46,19 @@ jobs:
 
       - name: Install Dependencies
         uses: jaid/action-npm-install@v1.2.1
+        working-directory: backend
 
       - name: Build CDK App with TypeScript Compiler
         run: npm run build
+        working-directory: backend
 
       - name: Run tests with Jest
         run: npm run test test/frontend-deploy-stack.test.ts
+        working-directory: backend
 
       - name: Deploy Frontend CI/CD Pipeline Stack
         uses: docker://kikemnzz/automate-cdk-github-action-kmzz:v1.0.0
+        working-directory: backend
         with:
           cdk_version: 1.109
           cdk_action: deploy
