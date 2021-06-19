@@ -6,9 +6,7 @@ import { customMuiTheme } from "../context/muiTheme";
 import { AmplifyClient } from "../context/amplifyClient";
 import { AppContextProvider } from "../context/appContext";
 
-export const wrapRootElement = () => ({
-  element,
-}: WrapRootElementBrowserArgs) => (
+export const wrapRootElement = ({ element }: WrapRootElementBrowserArgs) => (
   <ThemeProvider theme={customMuiTheme}>
     <AmplifyClient>
       <AppContextProvider>{element}</AppContextProvider>
