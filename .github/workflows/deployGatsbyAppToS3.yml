@@ -36,8 +36,7 @@ on:
       - ".github/workflows/deployFrontendBucketAndDist.yml"
 
 jobs:
-  # This workflow builds the react app on a Ubuntu VM and deploys it to surge.
-  DeployApp:
+  Deploy Gatsby Static Assets to S3 Bucket:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -57,7 +56,7 @@ jobs:
           npm i -g yarn
           yarn
 
-      - name: Build CDK App with TypeScript Compiler
+      - name: Build Gatsby App
         working-directory: client
         run: npm run build
 
