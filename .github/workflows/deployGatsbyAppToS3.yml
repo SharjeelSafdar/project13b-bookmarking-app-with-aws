@@ -19,6 +19,8 @@ on:
       - "client/.prettierignore"
       - "client/.prettierrc"
       - "client/LICENSE"
+      - ".github/workflows/deployBackendServicesStack.yml"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
   pull_request:
     branch: [main]
     paths-ignore:
@@ -30,6 +32,8 @@ on:
       - "client/.prettierignore"
       - "client/.prettierrc"
       - "client/LICENSE"
+      - ".github/workflows/deployBackendServicesStack.yml"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
 
 jobs:
   # This workflow builds the react app on a Ubuntu VM and deploys it to surge.
@@ -48,18 +52,19 @@ jobs:
         with: { node-version: "14.15.0" }
 
       - name: Install Dependencies
-        uses: jaid/action-npm-install@v1.2.1
-        working-directory: client
+        working-directory: backend
+        run: |
+          npm i -g yarn
+          yarn
 
       - name: Build CDK App with TypeScript Compiler
-        run: npm run build
         working-directory: client
+        run: npm run build
 
       - name: Deploy Static Site to S3 Bucket
         uses: reggionick/s3-deploy@v3
-        working-directory: client
         with:
-          folder: build
+          folder: client/build
           bucket: ${{ secrets.S3_BUCKET }}
           bucket-region: ${{ secrets.AWS_DEFAULT_REGION }}
           dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}

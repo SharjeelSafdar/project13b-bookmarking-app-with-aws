@@ -18,6 +18,8 @@ on:
       - "backend/.gitignore"
       - "backend/.nomignore"
       - "backend/.README.md"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
+      - ".github/workflows/deployGatsbyAppToS3.yml"
   pull_request:
     branch: [main]
     paths-ignore:
@@ -27,6 +29,8 @@ on:
       - "backend/.gitignore"
       - "backend/.nomignore"
       - "backend/.README.md"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
+      - ".github/workflows/deployGatsbyAppToS3.yml"
 
 jobs:
   # This workflow builds the react app on a Ubuntu VM and deploys it to surge.
@@ -45,25 +49,26 @@ jobs:
         with: { node-version: "14.15.0" }
 
       - name: Install Dependencies
-        uses: jaid/action-npm-install@v1.2.1
         working-directory: backend
+        run: |
+          npm i -g yarn
+          yarn
 
       - name: Build CDK App with TypeScript Compiler
-        run: npm run build
         working-directory: backend
+        run: npm run build
 
       - name: Run tests with Jest
-        run: npm run test test/backend-services-stack.test.ts
         working-directory: backend
+        run: npm run test test/backend-services-stack.test.ts
 
       - name: Deploy Frontend CI/CD Pipeline Stack
         uses: docker://kikemnzz/automate-cdk-github-action-kmzz:v1.0.0
-        working-directory: backend
         with:
           cdk_version: 1.109
           cdk_action: deploy
           cdk_stack: P13bBackendServicesStack
-          cdk_stack_directory: /
+          cdk_stack_directory: backend
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
