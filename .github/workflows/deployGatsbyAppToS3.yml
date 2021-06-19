@@ -1,0 +1,69 @@
+name: Deploy Gatsby Static Assets to S3 Bucket
+env:
+  owner: SharjeelSafdar
+  repo: project13b-bookmarking-app-with-aws
+
+# Controls when the action will run. Triggers the workflow on
+# 1) push event for main branch
+# 2) pull_request generated on main branch
+# 3) It's triggered only by changes in relavent files in backend/ directory
+on:
+  push:
+    branch: [main]
+    paths-ignore:
+      - "README.md"
+      - "backend/**"
+      - "client/.gitignore"
+      - "client/.README.md"
+      - "client/.vscode/**"
+      - "client/.prettierignore"
+      - "client/.prettierrc"
+      - "client/LICENSE"
+  pull_request:
+    branch: [main]
+    paths-ignore:
+      - "README.md"
+      - "backend/**"
+      - "client/.gitignore"
+      - "client/.README.md"
+      - "client/.vscode/**"
+      - "client/.prettierignore"
+      - "client/.prettierrc"
+      - "client/LICENSE"
+
+jobs:
+  # This workflow builds the react app on a Ubuntu VM and deploys it to surge.
+  DeployApp:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Install NodeJS
+        uses: actions/setup-node@v2
+        with: { node-version: "14.15.0" }
+
+      - name: Change Directory to backend/
+        run: cd client
+
+      - name: Install Dependencies
+        uses: jaid/action-npm-install@v1.2.1
+
+      - name: Build CDK App with TypeScript Compiler
+        run: npm run build
+
+      - name: Deploy Static Site to S3 Bucket
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: build
+          bucket: ${{ secrets.S3_BUCKET }}
+          bucket-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          invalidation: /
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
