@@ -1,6 +1,5 @@
 import * as cdk from "@aws-cdk/core";
 import * as s3 from "@aws-cdk/aws-s3";
-// import * as s3Deploy from "@aws-cdk/aws-s3-deployment";
 import * as cloudFront from "@aws-cdk/aws-cloudfront";
 import * as origins from "@aws-cdk/aws-cloudfront-origins";
 
@@ -18,7 +17,7 @@ export class FrontendDeployStack extends cdk.Stack {
         versioned: true,
         autoDeleteObjects: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
-        websiteIndexDocument: "/index.html",
+        websiteIndexDocument: "index.html",
         publicReadAccess: true,
       }
     );
@@ -31,17 +30,9 @@ export class FrontendDeployStack extends cdk.Stack {
         defaultBehavior: {
           origin: new origins.S3Origin(p13bBucketForFrontendAssets),
         },
-        defaultRootObject: "/index.html",
+        defaultRootObject: "index.html",
       }
     );
-
-    // Uploading the static site in bucket
-    // new s3Deploy.BucketDeployment(this, "DeployWesite", {
-    //   sources: [s3Deploy.Source.asset("../client/public")],
-    //   destinationBucket: p13bBucketForFrontendAssets,
-    //   distribution: p13bDistribution,
-    //   distributionPaths: ["/*"],
-    // });
 
     // Prints out the web endpoint to the terminal
     new cdk.CfnOutput(this, "P13bDistributionDomainName", {
