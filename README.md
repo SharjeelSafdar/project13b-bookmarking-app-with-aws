@@ -7,23 +7,41 @@
   Project 13B: Serverless JAMstack Bookmarking App with Gatsby, AppSync, DynamoDB, CloudFront and TypeScript
 </h1>
 
-### Link to Web App
+## Link to Web App
 
-The web app has been deployed to Netlify, and can be accessed [here](https://bookmarking-app-p12d.netlify.app/).
+The web app has been deployed to AWS CloudFront, and can be accessed [here](https://dw53lvip47mcd.cloudfront.net/).
 
-### Features
+## Frontend
 
 The following are some of the features of this project:
 
 - A dashboard for a user to manage his/her bookmarks
-- Fetches and displays the bookmarks from FaunaDB using the GraphQL API
 - Possible interactions with bookmarks: create a new bookmark, update an existing bookmark, delete a bookmark and batch delete existing bookmarks
-- A GraphQL API hosted in a Netlify function to interact with [FaunaDB](https://fauna.com/)
-- Demonstrates CRUD operations using FaunDB through the GraphQL API
-- Store management with Apollo Client's [InMemoryCache](https://www.apollographql.com/docs/react/caching/cache-configuration/) and React's [Context API](https://reactjs.org/docs/context.html)
+- A [DynamoDB](https://aws.amazon.com/dynamodb/) table to store bookmarks
+- A GraphQL API with [AWS AppSync](https://aws.amazon.com/appsync/) to interact with DynamoDB
+- Demonstrates CRUD operations using DynamoDB through the GraphQL API
+- Uses [Amplify](https://amplify.com/) for GraphQL queries and mutations
 - Bootstrapped with [GatsbyJS](https://www.gatsbyjs.com/)
 - Additionally, includes TypeScript support for gatsby-config, gatsby-node, gatsby-browser and gatsby-ssr files
-- Site hosted on [Netlify](https://www.netlify.com/)
-- CI/CD with Netlify
-- Completely typed with TypeScript
+- Site hosted on [AWS CloudFront](https://aws.amazon.com/cloudfront/)
+- CI/CD with [GitHub Actions](https://docs.github.com/en/actions)
+- Completely typed with [TypeScript](https://www.typescriptlang.org/)
 - Completely interactive and responsive design with [Material-UI](https://material-ui.com/) components.
+
+## Backend
+
+This AWS CDK App deploys the backend infrastructure for [Project 13A](https://github.com/SharjeelSafdar/project13a-serverless-jamstack-todo-app-with-aws-cdk). The app consists of two stacks.
+
+### Stack 1: AppSync GraphQL API and DynamoDB Table
+
+It contanis the AWS services used by the web client. It has the following constructs:
+
+- A DynamoDB Table to contain the todos saved by the users
+- An AppSync GraphQL API to access the todos in the Table
+
+### Stack 2: CloudFront Distribution and S3 Bucket
+
+It contains the infrastructure to deploy frontend client. It has the following constructs:
+
+- A S3 Bucket with public access to store the static assets of Gatsby web app
+- A Cloud Front Distribution to serve the static assets through a CDN
