@@ -12,11 +12,7 @@ on:
     branch: [main]
     paths-ignore:
       - "README.md"
-      - "backend/lib/backend-services-stack.ts"
-      - "backend/test/backend-services-stack.test.ts"
-      - "backend/.gitignore"
-      - "backend/.nomignore"
-      - "backend/.README.md"
+      - "backend/**"
       - "client/.gitignore"
       - "client/.README.md"
       - "client/.vscode/**"
@@ -24,15 +20,12 @@ on:
       - "client/.prettierrc"
       - "client/LICENSE"
       - ".github/workflows/deployBackendServicesStack.yml"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
   pull_request:
     branch: [main]
     paths-ignore:
       - "README.md"
-      - "backend/lib/backend-services-stack.ts"
-      - "backend/test/backend-services-stack.test.ts"
-      - "backend/.gitignore"
-      - "backend/.nomignore"
-      - "backend/.README.md"
+      - "backend/**"
       - "client/.gitignore"
       - "client/.README.md"
       - "client/.vscode/**"
@@ -40,9 +33,10 @@ on:
       - "client/.prettierrc"
       - "client/LICENSE"
       - ".github/workflows/deployBackendServicesStack.yml"
+      - ".github/workflows/deployFrontendBucketAndDist.yml"
 
 jobs:
-  Build_Gatsby_Static_Assets:
+  Deploy_Gatsby_Static_Assets_to_S3_Bucket:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -65,27 +59,13 @@ jobs:
         working-directory: client
         run: npm run build
 
-      - name: Install Dependencies
-        uses: bahmutov/npm-install@v1
+      - name: Deploy Static Site to S3 Bucket
+        uses: jakejarvis/s3-sync-action@master
         with:
-          working-directory: backend
-
-      - name: Build CDK App with TypeScript Compiler
-        working-directory: backend
-        run: npm run build
-
-      # - name: Run tests with Jest
-      #   working-directory: backend
-      #   run: npm run test test/frontend-deploy-stack.test.ts
-
-      - name: Deploy Frontend Deploy Stack to AWS CloudFormation
-        uses: docker://kikemnzz/automate-cdk-github-action-kmzz:v1.0.0
-        with:
-          cdk_version: 1.109
-          cdk_action: deploy --require-approval never
-          cdk_stack: P13bFrontendDeployStack
-          cdk_stack_directory: backend
+          args: --acl public-read --follow-symlinks --delete
         env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION  }}
+          SOURCE_DIR: client/public
