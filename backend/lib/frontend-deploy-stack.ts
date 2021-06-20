@@ -18,7 +18,7 @@ export class FrontendDeployStack extends cdk.Stack {
         versioned: true,
         autoDeleteObjects: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
-        websiteIndexDocument: "index.html",
+        websiteIndexDocument: "/index.html",
         publicReadAccess: true,
       }
     );
@@ -31,7 +31,7 @@ export class FrontendDeployStack extends cdk.Stack {
         defaultBehavior: {
           origin: new origins.S3Origin(p13bBucketForFrontendAssets),
         },
-        defaultRootObject: "index.html",
+        defaultRootObject: "/index.html",
       }
     );
 
