@@ -45,7 +45,7 @@ export interface ContextType {
 
 const initialState: ContextType = {
   bookmarks: [],
-  isFetchingBookmarks: false,
+  isFetchingBookmarks: true,
   isBusy: false,
   isSelectionMode: false,
   startSelectionMode: () => {},
