@@ -51,10 +51,9 @@ jobs:
         with: { node-version: "14.15.0" }
 
       - name: Install Dependencies
-        working-directory: client
-        run: |
-          npm i -g yarn
-          yarn
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: client
 
       - name: Build Gatsby App
         working-directory: client

@@ -48,10 +48,9 @@ jobs:
         with: { node-version: "14.15.0" }
 
       - name: Install Dependencies
-        working-directory: backend
-        run: |
-          npm i -g yarn
-          yarn
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: backend
 
       - name: Build CDK App with TypeScript Compiler
         working-directory: backend
