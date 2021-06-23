@@ -6,5 +6,5 @@ import awsConfig from "../aws-exports";
 export const AmplifyClient: FC = ({ children }) => {
   Amplify.configure(awsConfig);
 
-  return <div>{children}</div>;
+  return <>{children}</>;
 };
