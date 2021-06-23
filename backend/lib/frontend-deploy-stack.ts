@@ -34,6 +34,7 @@ export class FrontendDeployStack extends cdk.Stack {
         errorResponses: [
           {
             httpStatus: 404,
+            responseHttpStatus: 302,
             responsePagePath: "/404",
           },
         ],
