@@ -44,4 +44,4 @@ It contanis of the AWS services used by the web client. It has the following con
 It contains the infrastructure to deploy frontend client. It has the following constructs:
 
 - A S3 Bucket with public access to store the static assets of Gatsby web app
-- A Cloud Front Distribution to serve the static assets through a CDN
+- A Cloud Front Distribution to serve the static assets through a CDN. It also has the error handling capability: redirects any `404s` to `/404.html`.
