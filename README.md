@@ -20,7 +20,7 @@ The following are some of the features of this project:
 - A [DynamoDB](https://aws.amazon.com/dynamodb/) table to store bookmarks
 - A GraphQL API with [AWS AppSync](https://aws.amazon.com/appsync/) to interact with DynamoDB
 - Demonstrates CRUD operations using DynamoDB through the GraphQL API
-- Uses [Amplify](https://amplify.com/) for GraphQL queries and mutations
+- Uses [Amplify](https://amplify.com/) for GraphQL queries and mutations on client side
 - Bootstrapped with [GatsbyJS](https://www.gatsbyjs.com/)
 - Additionally, includes TypeScript support for gatsby-config, gatsby-node, gatsby-browser and gatsby-ssr files
 - Site hosted on [AWS CloudFront](https://aws.amazon.com/cloudfront/)
@@ -30,14 +30,14 @@ The following are some of the features of this project:
 
 ## Backend
 
-This AWS CDK App deploys the backend infrastructure for [Project 13A](https://github.com/SharjeelSafdar/project13a-serverless-jamstack-todo-app-with-aws-cdk). The app consists of two stacks.
+This AWS CDK App deploys the backend infrastructure for [Project 13B](https://github.com/SharjeelSafdar/project13b-bookmarking-app-with-aws). The app consists of two stacks.
 
 ### Stack 1: AppSync GraphQL API and DynamoDB Table
 
-It contanis the AWS services used by the web client. It has the following constructs:
+It contanis of the AWS services used by the web client. It has the following constructs:
 
-- A DynamoDB Table to contain the todos saved by the users
-- An AppSync GraphQL API to access the todos in the Table
+- A DynamoDB Table to contain the bookmarks saved by the users
+- An AppSync GraphQL API to access the bookmarks in the Table
 
 ### Stack 2: CloudFront Distribution and S3 Bucket
 
