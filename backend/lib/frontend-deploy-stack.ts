@@ -31,6 +31,12 @@ export class FrontendDeployStack extends cdk.Stack {
           origin: new origins.S3Origin(p13bBucketForFrontendAssets),
         },
         defaultRootObject: "index.html",
+        errorResponses: [
+          {
+            httpStatus: 404,
+            responsePagePath: "/404",
+          },
+        ],
       }
     );
 
