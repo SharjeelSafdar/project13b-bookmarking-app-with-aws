@@ -26,6 +26,7 @@ on:
       - "README.md"
       - "client/**"
       - "backend/lib/frontend-deploy-stack.ts"
+      - "backend/test/frontend-deploy-stack.test.ts"
       - "backend/.gitignore"
       - "backend/.nomignore"
       - "backend/.README.md"
