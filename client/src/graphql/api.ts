@@ -75,3 +75,37 @@ export type BookmarksQuery = {
     url: string,
   } >,
 };
+
+export type OnCreateBookmarkSubscription = {
+  onCreateBookmark?:  {
+    __typename: "Bookmark",
+    id: string,
+    title: string,
+    url: string,
+  } | null,
+};
+
+export type OnEditBookmarkSubscription = {
+  onEditBookmark?:  {
+    __typename: "Bookmark",
+    id: string,
+    title: string,
+    url: string,
+  } | null,
+};
+
+export type OnDeleteBookmarkSubscription = {
+  onDeleteBookmark?:  {
+    __typename: "Bookmark",
+    id: string,
+    title: string,
+    url: string,
+  } | null,
+};
+
+export type OnBatchDeleteBookmarksSubscription = {
+  onBatchDeleteBookmarks?:  Array< {
+    __typename: "DeletedBookmark",
+    id: string,
+  } | null > | null,
+};

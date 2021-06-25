@@ -49,9 +49,9 @@ const BookmarkModal: FC<BookmarkModalProps> = ({
   const onSubmit = async (values: FormValueTypes) => {
     const { title, url } = values;
     if (modalType === "New") {
-      createNewBookmark(title, url);
+      await createNewBookmark(title, url);
     } else if (!!oldBookmark) {
-      updateBookmark(oldBookmark.id, title, url);
+      await updateBookmark(oldBookmark.id, title, url);
     }
     closeModal();
   };

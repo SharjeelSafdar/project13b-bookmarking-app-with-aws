@@ -4,9 +4,12 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useReducer,
+  Reducer,
 } from "react";
 import { API } from "aws-amplify";
 
+import { reducerFunc, ReducerState, Action } from "./reducerFunction";
 import { bookmarks as getAllBookmarksQuery } from "../graphql/queries";
 import {
   createBookmark,
@@ -15,7 +18,12 @@ import {
   batchDeleteBookmarks,
 } from "../graphql/mutations";
 import {
-  Bookmark,
+  onCreateBookmark,
+  onEditBookmark,
+  onDeleteBookmark,
+  onBatchDeleteBookmarks,
+} from "../graphql/subscriptions";
+import {
   BookmarksQuery,
   CreateBookmarkMutation,
   CreateBookmarkMutationVariables,
@@ -25,32 +33,24 @@ import {
   DeleteBookmarkMutationVariables,
   BatchDeleteBookmarksMutation,
   BatchDeleteBookmarksMutationVariables,
+  OnCreateBookmarkSubscription,
+  OnEditBookmarkSubscription,
+  OnDeleteBookmarkSubscription,
+  OnBatchDeleteBookmarksSubscription,
 } from "../graphql/api";
 
-export interface ContextType {
-  bookmarks: Bookmark[];
-  isFetchingBookmarks: boolean;
-  isBusy: boolean;
-  isSelectionMode: boolean;
-  startSelectionMode: () => void;
-  finishSelectionMode: () => void;
-  selectedBookmarks: string[];
-  toggleBookmarkSelection: (bookmarkId: string) => void;
-  getAllBookmarks: () => void;
-  createNewBookmark: (title: string, url: string) => void;
-  updateBookmark: (id: string, title: string, url: string) => void;
-  deleteBookmarkById: (id: string) => void;
-  batchDeleteBookmarksById: () => void;
-}
+const reducerInitialState: ReducerState = {
+  bookmarks: [],
+  isSelectionMode: false,
+  selectedBookmarks: [],
+};
 
 const initialState: ContextType = {
-  bookmarks: [],
+  ...reducerInitialState,
   isFetchingBookmarks: true,
   isBusy: false,
-  isSelectionMode: false,
   startSelectionMode: () => {},
   finishSelectionMode: () => {},
-  selectedBookmarks: [],
   toggleBookmarkSelection: () => {},
   getAllBookmarks: () => {},
   createNewBookmark: () => {},
@@ -64,40 +64,30 @@ export const AppContext = createContext<ContextType>(initialState);
 export const useAppContext = () => useContext(AppContext);
 
 export const AppContextProvider: FC = ({ children }) => {
-  const [bookmarks, setBookmarks] = useState(initialState.bookmarks);
+  const [reducerState, dispatch] = useReducer<Reducer<ReducerState, Action>>(
+    reducerFunc,
+    reducerInitialState
+  );
   const [isFetchingBookmarks, setIsFetchingBookmarks] = useState(
     initialState.isFetchingBookmarks
   );
   const [isBusy, setIsBusy] = useState(initialState.isBusy);
-  const [isSelectionMode, setSelectionMode] = useState(false);
-  const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
 
   const startSelectionMode = () => {
-    setSelectionMode(true);
-    setSelectedBookmarks([]);
+    dispatch({ id: "START_SELECTION_MODE" });
   };
 
   const finishSelectionMode = () => {
-    setSelectionMode(false);
-    setSelectedBookmarks([]);
-  };
-
-  const selectBookmark = (bookmarkId: string) => {
-    setSelectedBookmarks(prev => [...prev, bookmarkId]);
-  };
-
-  const unselectBookmark = (bookmarkId: string) => {
-    setSelectedBookmarks(prev => prev.filter(id => id !== bookmarkId));
+    dispatch({ id: "FINISH_SELECTION_MODE" });
   };
 
   const toggleBookmarkSelection = (bookmarkId: string) => {
-    if (!selectedBookmarks.includes(bookmarkId)) {
-      selectBookmark(bookmarkId);
-    } else {
-      unselectBookmark(bookmarkId);
-    }
+    dispatch({ id: "TOGGLE_BOOKMARK_SELECTION", payload: { bookmarkId } });
   };
 
+  /* *********************************************************** */
+  /* ********************* Query Functions ********************* */
+  /* *********************************************************** */
   const getAllBookmarks = async () => {
     setIsFetchingBookmarks(true);
 
@@ -105,8 +95,9 @@ export const AppContextProvider: FC = ({ children }) => {
       const response = (await API.graphql({
         query: getAllBookmarksQuery,
       })) as { data: BookmarksQuery };
+      const bookmarks = response.data.bookmarks;
 
-      setBookmarks(response.data.bookmarks);
+      dispatch({ id: "SET_BOOKMARKS", payload: { bookmarks } });
     } catch (err) {
       console.log("Error fetching bookmarks: ", JSON.stringify(err, null, 2));
     }
@@ -114,6 +105,9 @@ export const AppContextProvider: FC = ({ children }) => {
     setIsFetchingBookmarks(false);
   };
 
+  /* ************************************************************** */
+  /* ********************* Mutation Functions ********************* */
+  /* ************************************************************** */
   const createNewBookmark = async (title: string, url: string) => {
     setIsBusy(true);
 
@@ -123,7 +117,9 @@ export const AppContextProvider: FC = ({ children }) => {
         query: createBookmark,
         variables,
       })) as { data: CreateBookmarkMutation };
-      setBookmarks(prev => [response.data.createBookmark, ...prev]);
+      const newBookmark = response.data.createBookmark;
+
+      dispatch({ id: "ADD_NEW_BOOKMARK", payload: { newBookmark } });
     } catch (err) {
       console.log(
         "Error creating new bookmark: ",
@@ -143,15 +139,9 @@ export const AppContextProvider: FC = ({ children }) => {
         query: editBookmark,
         variables,
       })) as { data: EditBookmarkMutation };
+      const newBookmark = response.data.editBookmark;
 
-      setBookmarks(prev => {
-        const bookmarkIndex = prev.findIndex(bookmark => bookmark.id === id);
-        if (bookmarkIndex !== -1) {
-          prev[bookmarkIndex].title = response.data.editBookmark.title;
-          prev[bookmarkIndex].url = response.data.editBookmark.url;
-        }
-        return prev;
-      });
+      dispatch({ id: "UPDATE_BOOKMARK", payload: { newBookmark } });
     } catch (err) {
       console.log("Error updating bookmark: ", err);
     }
@@ -168,10 +158,9 @@ export const AppContextProvider: FC = ({ children }) => {
         query: deleteBookmark,
         variables,
       })) as { data: DeleteBookmarkMutation };
+      const bookmarkId = response.data.deleteBookmark.id;
 
-      setBookmarks(prev =>
-        prev.filter(bookmark => bookmark.id !== response.data.deleteBookmark.id)
-      );
+      dispatch({ id: "DELETE_BOOKMARK", payload: { bookmarkId } });
     } catch (err) {
       console.log("Error deleting the bookmark: ", err);
     }
@@ -184,20 +173,20 @@ export const AppContextProvider: FC = ({ children }) => {
 
     try {
       const variables: BatchDeleteBookmarksMutationVariables = {
-        ids: selectedBookmarks,
+        ids: reducerState.selectedBookmarks,
       };
       const response = (await API.graphql({
         query: batchDeleteBookmarks,
         variables,
       })) as { data: BatchDeleteBookmarksMutation };
 
-      const deletedIds = response.data.batchDeleteBookmarks.map(
+      const bookmarkIds = response.data.batchDeleteBookmarks.map(
         bookmark => bookmark?.id
       );
 
-      setBookmarks(prev =>
-        prev.filter(bookmark => !deletedIds.includes(bookmark.id))
-      );
+      if (bookmarkIds) {
+        dispatch({ id: "BATCH_DELETE_BOOKMARK", payload: { bookmarkIds } });
+      }
     } catch (err) {
       console.log("Error deleting the bookmarks: ", err);
     }
@@ -206,18 +195,93 @@ export const AppContextProvider: FC = ({ children }) => {
     setIsBusy(false);
   };
 
+  /* ****************************************************************** */
+  /* ********************* Subscription Functions ********************* */
+  /* ****************************************************************** */
+  const onCreateBookmarkSub = async () => {
+    const subscription = API.graphql({
+      query: onCreateBookmark,
+    }) as any;
+
+    subscription.subscribe({
+      next: (status: { value: { data: OnCreateBookmarkSubscription } }) => {
+        if (status.value.data.onCreateBookmark) {
+          const newBookmark = status.value.data.onCreateBookmark;
+          console.log("Sub: ", newBookmark);
+          dispatch({ id: "ADD_NEW_BOOKMARK", payload: { newBookmark } });
+        }
+      },
+    });
+  };
+
+  const OnEditBookmarkSub = async () => {
+    const subscription = API.graphql({
+      query: onEditBookmark,
+    }) as any;
+
+    subscription.subscribe({
+      next: (status: { value: { data: OnEditBookmarkSubscription } }) => {
+        if (status.value.data.onEditBookmark) {
+          const newBookmark = status.value.data.onEditBookmark;
+          console.log("Sub: ", newBookmark);
+          dispatch({ id: "UPDATE_BOOKMARK", payload: { newBookmark } });
+        }
+      },
+    });
+  };
+
+  const OnDeleteBookmarkSub = async () => {
+    const subscription = API.graphql({
+      query: onDeleteBookmark,
+    }) as any;
+
+    subscription.subscribe({
+      next: (status: { value: { data: OnDeleteBookmarkSubscription } }) => {
+        if (status.value.data.onDeleteBookmark) {
+          const deletedBookmark = status.value.data.onDeleteBookmark;
+          const bookmarkId = deletedBookmark.id;
+          console.log("Sub: ", deletedBookmark);
+          dispatch({ id: "DELETE_BOOKMARK", payload: { bookmarkId } });
+        }
+      },
+    });
+  };
+
+  const OnBatchDeleteBookmarksSub = async () => {
+    const subscription = API.graphql({
+      query: onBatchDeleteBookmarks,
+    }) as any;
+
+    subscription.subscribe({
+      next: (status: {
+        value: { data: OnBatchDeleteBookmarksSubscription };
+      }) => {
+        if (status.value.data.onBatchDeleteBookmarks) {
+          console.log("Sub: ", status.value.data.onBatchDeleteBookmarks);
+          const bookmarkIds = status.value.data.onBatchDeleteBookmarks.map(
+            bookmark => bookmark?.id
+          );
+
+          dispatch({ id: "BATCH_DELETE_BOOKMARK", payload: { bookmarkIds } });
+        }
+      },
+    });
+  };
+
   useEffect(() => {
     getAllBookmarks();
+    onCreateBookmarkSub();
+    OnEditBookmarkSub();
+    OnDeleteBookmarkSub();
+    OnBatchDeleteBookmarksSub();
   }, []);
 
   const value: ContextType = {
-    bookmarks,
+    ...reducerState,
     isFetchingBookmarks,
     isBusy,
-    isSelectionMode,
     startSelectionMode,
     finishSelectionMode,
-    selectedBookmarks,
     toggleBookmarkSelection,
     getAllBookmarks,
     createNewBookmark,
@@ -228,3 +292,16 @@ export const AppContextProvider: FC = ({ children }) => {
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
+
+export interface ContextType extends ReducerState {
+  isFetchingBookmarks: boolean;
+  isBusy: boolean;
+  startSelectionMode: () => void;
+  finishSelectionMode: () => void;
+  toggleBookmarkSelection: (bookmarkId: string) => void;
+  getAllBookmarks: () => void;
+  createNewBookmark: (title: string, url: string) => void;
+  updateBookmark: (id: string, title: string, url: string) => void;
+  deleteBookmarkById: (id: string) => void;
+  batchDeleteBookmarksById: () => void;
+}
