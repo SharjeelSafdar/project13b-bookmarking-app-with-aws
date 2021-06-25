@@ -18,3 +18,12 @@ type Mutation {
   deleteBookmark(id: ID!): Bookmark!
   batchDeleteBookmarks(ids: [ID!]!): [DeletedBookmark]!
 }
+
+type Subscription {
+  onCreateBookmark: Bookmark @aws_subscribe(mutations: ["createBookmark"])
+  onEditBookmark: Bookmark @aws_subscribe(mutations: ["editBookmark"])
+  onDeleteBookmark: Bookmark @aws_subscribe(mutations: ["deleteBookmark"])
+
+  onBatchDeleteBookmarks: [DeletedBookmark]
+    @aws_subscribe(mutations: ["batchDeleteBookmarks"])
+}
