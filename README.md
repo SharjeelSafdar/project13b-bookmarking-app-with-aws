@@ -33,6 +33,10 @@ The following are some of the features of this project:
 
 This AWS CDK App deploys the backend infrastructure for [Project 13B](https://github.com/SharjeelSafdar/project13b-bookmarking-app-with-aws). The app consists of two stacks.
 
+<p align="center">
+  <img alt="Architecture Diagram" src="./backend/P13b AWS Architecture.jpg" />
+</p>
+
 ### Stack 1: AppSync GraphQL API and DynamoDB Table
 
 It contanis the AWS services used by the web client. It has the following constructs:
