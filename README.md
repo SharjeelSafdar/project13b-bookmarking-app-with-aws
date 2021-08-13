@@ -50,3 +50,7 @@ It contains the infrastructure to deploy frontend client. It has the following c
 
 - A S3 Bucket with public access to store the static assets of Gatsby web app
 - A Cloud Front Distribution to serve the static assets through a CDN. It also has the error handling capability: redirects any `404s` to `/404.html`.
+
+<p align="center">
+  <img alt="Architecture Diagram" src="./backend/CloudFront Distribution Stack.jpg" />
+</p>
